@@ -8,7 +8,7 @@ from sqlalchemy.engine import make_url
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="TRACEFORGE_", env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://traceforge:traceforge@localhost:54329/traceforge"
+    database_url: str = "postgresql+psycopg://traceforge:traceforge@127.0.0.1:54329/traceforge"
     artifact_root: Path = Path(".artifacts")
     lease_seconds: int = Field(default=30, ge=3, le=3600)
     poll_seconds: float = Field(default=1, ge=0.05, le=60)

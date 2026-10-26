@@ -17,7 +17,7 @@ def postgres_settings(tmp_path_factory):
     if not url:
         pytest.skip("Set TRACEFORGE_TEST_DATABASE_URL to run real PostgreSQL integration checks")
     # Create a disposable database; never truncate the supplied development database.
-    admin = create_engine(url, isolation_level="AUTOCOMMIT")
+    admin = create_engine(url, isolation_level="AUTOCOMMIT", connect_args={"connect_timeout": 5})
     database = f"traceforge_test_{uuid4().hex}"
     with admin.connect() as connection:
         connection.execute(text(f'CREATE DATABASE "{database}"'))

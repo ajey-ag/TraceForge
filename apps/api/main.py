@@ -248,6 +248,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             clear_lease(job)
             transition(session, row, Status.CANCELLED, Stage(row.stage), "Cancelled by user")
             row.explanation = "Cancelled by user; no further results will be published"
+            session.flush()
+            session.refresh(row)
         return investigation_view(row)
 
     return app

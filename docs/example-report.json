@@ -1,0 +1,52 @@
+{
+  "schema_version": "1",
+  "investigation_id": "45b06a96-63c0-4397-a196-50e177f23f3e",
+  "source": "fixture",
+  "fixture_id": "calculator-add",
+  "commit_sha": "f827c3ab8f6c29e42ffb26daa79e529e7becd6c3",
+  "outcome": "DIAGNOSED",
+  "summary": "Parsed 1 saved pytest failure(s); heuristic category: APPLICATION_CODE_REGRESSION. No repair was attempted.",
+  "parsed": {
+    "failure_category": "APPLICATION_CODE_REGRESSION",
+    "failed_test_identifiers": [
+      "test_calculator.py::test_add_positive_numbers"
+    ],
+    "failures": [
+      {
+        "test_id": "test_calculator.py::test_add_positive_numbers",
+        "exception_type": "AssertionError",
+        "message": "assert -1 == 5",
+        "traceback": [
+          {
+            "path": "test_calculator.py",
+            "line": 5,
+            "context": "in test_add_positive_numbers"
+          }
+        ]
+      }
+    ],
+    "limitations": [
+      "Deterministic text parsing only; category is a heuristic, not a proven root cause.",
+      "Saved fixture evidence was parsed; this investigation did not execute tests."
+    ]
+  },
+  "evidence": [
+    {
+      "id": "bb836c29-9848-578a-b944-b9251cd18f58",
+      "type": "PYTEST_LOG",
+      "sha256": "319b2897d1a997b8257068a01532dd827b198a7314e6921ce455bd55c6f86ae6",
+      "artifact": "319b2897d1a997b8257068a01532dd827b198a7314e6921ce455bd55c6f86ae6"
+    },
+    {
+      "id": "a7bc3d70-8e03-52a3-90ff-122ab8dfd2c4",
+      "type": "FIXTURE_MANIFEST",
+      "sha256": "a5c424ace1940b963a13a042c7e2809bd55089b681f33db38aacf0f2fecaa0d7",
+      "artifact": "a5c424ace1940b963a13a042c7e2809bd55089b681f33db38aacf0f2fecaa0d7"
+    }
+  ],
+  "reproduction_status": "NOT_RUN_SAVED_LOG_ONLY",
+  "patch_status": "NOT_PROPOSED",
+  "verification_status": "NOT_RUN",
+  "model_calls": 0,
+  "observed_model_cost_usd": 0
+}
