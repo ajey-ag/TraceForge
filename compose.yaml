@@ -23,6 +23,12 @@ services:
     environment: &app-env
       TRACEFORGE_DATABASE_URL: postgresql+psycopg://traceforge:traceforge@db:5432/traceforge
       TRACEFORGE_ARTIFACT_ROOT: /data/artifacts
+      TRACEFORGE_RUNNER_URL: http://runner:8765
+      TRACEFORGE_RUNNER_TOKEN: ${TRACEFORGE_RUNNER_TOKEN:-local-traceforge-runner}
+      TRACEFORGE_OPENAI_API_KEY: ${TRACEFORGE_OPENAI_API_KEY:-}
+      TRACEFORGE_GITHUB_TOKEN: ${TRACEFORGE_GITHUB_TOKEN:-}
+      TRACEFORGE_GITHUB_WEBHOOK_SECRET: ${TRACEFORGE_GITHUB_WEBHOOK_SECRET:-}
+      TRACEFORGE_GITHUB_REPOSITORIES: ${TRACEFORGE_GITHUB_REPOSITORIES:-}
     depends_on:
       db:
         condition: service_healthy
@@ -55,6 +61,35 @@ services:
       migrate:
         condition: service_completed_successfully
     stop_grace_period: 10s
+  execution-image:
+    image: traceforge-execution:local
+    profiles: [build]
+    build:
+      context: .
+      dockerfile: infra/Execution.Dockerfile
+  runner:
+    build:
+      context: .
+      dockerfile: infra/Runner.Dockerfile
+    environment:
+      TRACEFORGE_RUNNER_TOKEN: ${TRACEFORGE_RUNNER_TOKEN:-local-traceforge-runner}
+      TRACEFORGE_RUNNER_STATE: /data/runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner-state:/data/runner
+    stop_grace_period: 10s
+  web:
+    build:
+      context: .
+      dockerfile: infra/Web.Dockerfile
+    environment:
+      TRACEFORGE_API_URL: http://api:8000
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
 volumes:
   postgres-data:
   artifacts:
+  runner-state:

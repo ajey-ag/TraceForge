@@ -1,5 +1,16 @@
 # Progress
 
+## Remaining milestones: implementation in progress
+
+- Phase 2 implementation added: provider boundary, deterministic fake provider, OpenAI
+  HTTP adapter, LangGraph workflow, AST source inspection, versioned prompts, citation
+  validation, persisted model-call identities, conservative budgets, and routing records.
+- Check after diagnosis integration: **33 tests passed** using real PostgreSQL, including
+  malformed model output, invalid citations, missing credentials, and recoverable timeout behavior.
+- No paid provider request has been made. The real adapter still requires a credentialed smoke test.
+- Controlled runner and repair verification are being implemented next; their acceptance
+  is not yet claimed. The phase table below records the previously completed baseline.
+
 ## Phase 0–1: completed
 
 The first usable vertical slice is implemented and verified:

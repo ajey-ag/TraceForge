@@ -9,3 +9,7 @@ dist/
 .env
 .artifacts/
 .coverage
+.runner-state/
+node_modules/
+.next/
+*.tsbuildinfo

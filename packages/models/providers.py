@@ -61,7 +61,7 @@ class FakeProvider:
                             ],
                         }
                     ],
-                    "recommended_action": "Reproduce the original failing test in an isolated environment.",
+                    "recommended_action": "Reproduce the failing test in an isolated environment.",
                     "unsupported_explanation": None,
                 }
             )
@@ -87,7 +87,7 @@ class OpenAIProvider:
         self.settings = settings
 
     def generate(self, task: str, context: dict, model: str) -> ModelResult:
-        if not self.settings.openai_api_key:
+        if not self.settings.openai_api_key or not self.settings.openai_api_key.get_secret_value():
             raise ProviderError("OpenAI credentials are not configured")
         try:
             with httpx.Client(

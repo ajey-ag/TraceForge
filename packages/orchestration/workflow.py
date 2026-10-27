@@ -41,6 +41,26 @@ def run_workflow(runtime, report, context):
         return {"report": report}
 
     graph = StateGraph(State)
+    if runtime.policy["execution_policy"] == "reproduce":
+        from packages.runner.client import run_execution
+
+        def reproduce(state):
+            runtime.stage(Stage.REPRODUCE, "Model-free controlled reproduction")
+            result = run_execution(runtime, "reproduce")
+            report.reproduction = result
+            report.reproduction_status = result["status"]
+            if result["status"] == "NOT_REPRODUCED":
+                report.outcome = "NOT_REPRODUCED"
+            elif result["status"] != "REPRODUCED":
+                report.outcome = "NO_VERIFIED_REPAIR"
+            return {"report": report}
+
+        graph.add_node("reproduce", reproduce)
+        graph.add_edge(START, "reproduce")
+        graph.add_edge("reproduce", END)
+        graph.compile().invoke({"report": report})
+        report.summary = f"Controlled reproduction: {report.reproduction_status}; no patch requested."
+        return report
     graph.add_node("diagnose", diagnose)
     graph.add_edge(START, "diagnose")
     if runtime.policy["execution_policy"] == "repair":

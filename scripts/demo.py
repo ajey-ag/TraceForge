@@ -26,16 +26,20 @@ def main():
     parser.add_argument("--url", default="http://127.0.0.1:8000")
     parser.add_argument("--restart-services", action="store_true")
     parser.add_argument("--save-report", type=Path)
+    parser.add_argument("--repair", action="store_true", help="Run controlled fake-provider repair")
     args = parser.parse_args()
     with httpx.Client(base_url=args.url, timeout=10) as client:
         wait_ready(client)
         assert client.get("/health").status_code == 200
         assert client.post("/investigations", json={"fixture_id": "missing"}).status_code == 404
-        response = client.post("/investigations", json={"fixture_id": "calculator-add"})
+        body = {"fixture_id": "calculator-add"}
+        if args.repair:
+            body.update(execution_policy="repair", max_model_calls=3, provider="fake")
+        response = client.post("/investigations", json=body)
         response.raise_for_status()
         identity = response.json()["id"]
         endpoint = f"/investigations/{identity}/report"
-        deadline = time.monotonic() + 60
+        deadline = time.monotonic() + 180
         while time.monotonic() < deadline:
             response = client.get(endpoint)
             if response.status_code == 200:
@@ -45,9 +49,13 @@ def main():
             time.sleep(0.5)
         response.raise_for_status()
         report = response.json()
-        assert report["outcome"] == "DIAGNOSED"
+        assert report["outcome"] == ("VERIFIED_REPAIR" if args.repair else "DIAGNOSED"), report
         assert report["parsed"]["failures"][0]["exception_type"] == "AssertionError"
-        assert report["verification_status"] == "NOT_RUN"
+        if args.repair:
+            assert report["reproduction_status"] == "REPRODUCED"
+            assert report["verification_status"] == "PASSED_TARGETED_AND_CONTROLLED_REGRESSION"
+        else:
+            assert report["verification_status"] == "NOT_RUN"
         for item in report["evidence"]:
             evidence = client.get(f"/investigations/{identity}/evidence/{item['id']}")
             evidence.raise_for_status()

@@ -12,13 +12,17 @@ from packages.core.config import Settings
 from packages.core.contracts import Report, Stage, Status, Submission
 from packages.core.logging import configure_logging
 from packages.ingestion.fixtures import FIXTURE_IDS, load_fixture
+from packages.integrations.routes import router as github_router
 from packages.persistence.database import check_database, make_engine, session_factory
 from packages.persistence.lifecycle import transition
 from packages.persistence.models import (
     Evidence,
+    Experiment,
     Investigation,
     Job,
     JobAttempt,
+    Operation,
+    PatchCandidate,
     StoredReport,
     Transition,
 )
@@ -62,6 +66,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(title="TraceForge", version="0.1.0", lifespan=lifespan)
     app.state.engine = engine
     app.state.sessions = sessions
+    app.include_router(github_router(settings, sessions))
 
     @app.exception_handler(SQLAlchemyError)
     async def database_error(request, exc):
@@ -205,6 +210,59 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     409, detail=f"Report unavailable; investigation is {row.status}"
                 )
             return saved.payload
+
+    @app.get("/investigations/{identity}/operations")
+    def operations(identity: UUID):
+        with sessions() as session:
+            require_investigation(session, identity)
+            return [
+                {
+                    "id": row.id,
+                    "key": row.key,
+                    "kind": row.kind,
+                    "status": row.status,
+                    "request": row.request,
+                    "result": row.result,
+                    "started_at": row.started_at,
+                    "ended_at": row.ended_at,
+                }
+                for row in session.scalars(
+                    select(Operation)
+                    .where(
+                        Operation.investigation_id == identity,
+                    )
+                    .order_by(Operation.started_at)
+                )
+            ]
+
+    @app.get("/investigations/{identity}/patches/{patch_id}")
+    def patch(identity: UUID, patch_id: UUID):
+        with sessions() as session:
+            row = session.get(PatchCandidate, patch_id)
+            if row is None or row.investigation_id != identity:
+                raise HTTPException(404, "Patch not found in investigation")
+            try:
+                content = store.read(row.artifact)
+            except (OSError, ValueError) as exc:
+                raise HTTPException(503, "Patch artifact missing or corrupt") from exc
+            return Response(
+                content,
+                media_type="text/plain",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{patch_id}.diff"',
+                    "X-Content-Type-Options": "nosniff",
+                },
+            )
+
+    @app.get("/experiments")
+    def experiments():
+        with sessions() as session:
+            return [
+                {"id": row.id, "created_at": row.created_at, "results": row.payload}
+                for row in session.scalars(
+                    select(Experiment).order_by(Experiment.created_at.desc()).limit(50)
+                )
+            ]
 
     @app.get("/investigations/{identity}/evidence/{evidence_id}")
     def evidence(identity: UUID, evidence_id: UUID):

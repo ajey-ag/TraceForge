@@ -1,0 +1,393 @@
+{
+  "schema_version": "1",
+  "investigation_id": "1235ae37-a665-4489-b457-ba432ea84288",
+  "source": "fixture",
+  "fixture_id": "calculator-add",
+  "commit_sha": "f827c3ab8f6c29e42ffb26daa79e529e7becd6c3",
+  "outcome": "VERIFIED_REPAIR",
+  "summary": "VERIFIED_REPAIR: fake provider; reproduction=REPRODUCED; verification=PASSED_TARGETED_AND_CONTROLLED_REGRESSION.",
+  "parsed": {
+    "failure_category": "APPLICATION_CODE_REGRESSION",
+    "failed_test_identifiers": [
+      "test_calculator.py::test_add_positive_numbers"
+    ],
+    "failures": [
+      {
+        "test_id": "test_calculator.py::test_add_positive_numbers",
+        "exception_type": "AssertionError",
+        "message": "assert -1 == 5",
+        "traceback": [
+          {
+            "path": "test_calculator.py",
+            "line": 5,
+            "context": "in test_add_positive_numbers"
+          }
+        ]
+      }
+    ],
+    "limitations": [
+      "Deterministic text parsing only; category is a heuristic, not a proven root cause.",
+      "Saved fixture evidence was parsed; this investigation did not execute tests."
+    ]
+  },
+  "evidence": [
+    {
+      "id": "a438857e-25dd-5a35-bbb6-353cb50b4dc2",
+      "type": "PYTEST_LOG",
+      "sha256": "5bb74bfadfa0c0dd8fd7dd26dbce16fc4831f7196567b4d1157e691ab5e2bcff",
+      "artifact": "5bb74bfadfa0c0dd8fd7dd26dbce16fc4831f7196567b4d1157e691ab5e2bcff"
+    },
+    {
+      "id": "45a6cd4e-521d-597c-afd1-43075d7c4738",
+      "type": "FIXTURE_MANIFEST",
+      "sha256": "c0c184feca2397a22495dba147d90483937d5eb61e05bdddd05c9f1e4d24fc8b",
+      "artifact": "c0c184feca2397a22495dba147d90483937d5eb61e05bdddd05c9f1e4d24fc8b"
+    },
+    {
+      "id": "c8148678-8fb2-5e26-ae3e-c2767261c254",
+      "type": "SOURCE:calculator.py",
+      "sha256": "2da53c69b1136560ce3003a1f734d93eaa63fed3a5b9afc6712c340d86b877d3",
+      "artifact": "2da53c69b1136560ce3003a1f734d93eaa63fed3a5b9afc6712c340d86b877d3"
+    },
+    {
+      "id": "8af6c0d4-c477-56e5-b0e2-821d250d7475",
+      "type": "SOURCE:test_calculator.py",
+      "sha256": "bfd932ac43518ac7ddceab10ffed75f1b73284a2334d3ee44ba59430afda6d4b",
+      "artifact": "bfd932ac43518ac7ddceab10ffed75f1b73284a2334d3ee44ba59430afda6d4b"
+    }
+  ],
+  "reproduction_status": "REPRODUCED",
+  "patch_status": "VERIFIED",
+  "verification_status": "PASSED_TARGETED_AND_CONTROLLED_REGRESSION",
+  "model_calls": 2,
+  "observed_model_cost_usd": 0.0,
+  "estimated_model_cost_usd": 0.0,
+  "provider": "fake",
+  "diagnosis": {
+    "hypotheses": [
+      {
+        "rank": 1,
+        "statement": "The owned demo add function subtracts its operands.",
+        "evidence_ids": [
+          "c8148678-8fb2-5e26-ae3e-c2767261c254",
+          "8af6c0d4-c477-56e5-b0e2-821d250d7475"
+        ],
+        "missing_or_contradictory_evidence": [
+          "Requires independent execution verification"
+        ]
+      }
+    ],
+    "observed_facts": [
+      {
+        "statement": "Saved pytest evidence reports an assertion failure.",
+        "evidence_ids": [
+          "a438857e-25dd-5a35-bbb6-353cb50b4dc2"
+        ]
+      }
+    ],
+    "recommended_action": "Reproduce the failing test in an isolated environment.",
+    "unsupported_explanation": null
+  },
+  "reproduction": {
+    "error": null,
+    "status": "REPRODUCED",
+    "commands": [
+      {
+        "argv": [
+          "/opt/project/.venv/bin/python",
+          "-m",
+          "pytest",
+          "-q",
+          "--tb=short",
+          "--color=no",
+          "-p",
+          "no:cacheprovider",
+          "test_calculator.py"
+        ],
+        "stderr": "",
+        "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n__________________________ test_add_positive_numbers ___________________________\ntest_calculator.py:5: in test_add_positive_numbers\n    assert add(2, 3) == 5\nE   assert -1 == 5\nE    +  where -1 = add(2, 3)\n=========================== short test summary info ============================\nFAILED test_calculator.py::test_add_positive_numbers - assert -1 == 5\n1 failed in 0.05s\n",
+        "exit_code": 1
+      }
+    ],
+    "environment": {
+      "git": "git version 2.39.5",
+      "cpus": 1,
+      "image": "traceforge-execution:local",
+      "pytest": "pytest 8.4.2",
+      "python": "3.12.10",
+      "network": "none",
+      "image_id": "sha256:f1558b860e90553a9d1bb09864c499b05303df46ca3ec025d72d7a7811b4c0ee",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.36",
+      "commit_sha": "f827c3ab8f6c29e42ffb26daa79e529e7becd6c3",
+      "memory_bytes": 268435456,
+      "docker_command": [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--name",
+        "traceforge-job-2d615b1a-62af-51b8-a010-b847eac3e706",
+        "--label",
+        "traceforge.execution=true",
+        "--network",
+        "none",
+        "--read-only",
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--memory",
+        "256m",
+        "--memory-swap",
+        "256m",
+        "--cpus",
+        "1",
+        "--pids-limit",
+        "64",
+        "--tmpfs",
+        "/workspace:rw,noexec,nosuid,size=64m,uid=10001,gid=10001",
+        "--tmpfs",
+        "/tmp:rw,noexec,nosuid,size=32m,uid=10001,gid=10001",
+        "--user",
+        "10001:10001",
+        "sha256:f1558b860e90553a9d1bb09864c499b05303df46ca3ec025d72d7a7811b4c0ee"
+      ],
+      "setup_commands": [
+        {
+          "argv": [
+            "git",
+            "init",
+            "--initial-branch=main",
+            "--object-format=sha1"
+          ],
+          "stderr": "",
+          "stdout": "Initialized empty Git repository in /workspace/repo/.git/\n",
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "git",
+            "-c",
+            "core.autocrlf=false",
+            "add",
+            "calculator.py",
+            "test_calculator.py"
+          ],
+          "stderr": "",
+          "stdout": "",
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "git",
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "-m",
+            "Intentional addition regression"
+          ],
+          "stderr": "",
+          "stdout": "[main (root-commit) f827c3a] Intentional addition regression\n 2 files changed, 8 insertions(+)\n create mode 100644 calculator.py\n create mode 100644 test_calculator.py\n",
+          "exit_code": 0
+        }
+      ],
+      "timeout_seconds": 30,
+      "output_limit_bytes": 256000,
+      "container_exit_code": 0,
+      "dependency_preparation": "Locked pytest installed at image build, no runtime downloads",
+      "protected_files_unchanged": true
+    },
+    "limitations": [
+      "Controlled calculator fixture only; passing these checks is not proof of general correctness."
+    ],
+    "duration_seconds": 17.7519673099996
+  },
+  "patches": [
+    {
+      "id": "a5e78d4c-50eb-50c9-b17e-2246ee8e84d9",
+      "status": "VERIFIED",
+      "attempt": 1,
+      "artifact": "bc1dea982dafe2986f92043709e9151a1f2d276308fc46a5c0960cd67c52674a",
+      "explanation": "Deterministic fake-provider demonstration: restore addition.",
+      "changed_files": [
+        "calculator.py"
+      ]
+    }
+  ],
+  "verification": [
+    {
+      "error": null,
+      "status": "PASSED",
+      "commands": [
+        {
+          "argv": [
+            "/opt/project/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q",
+            "--tb=short",
+            "--color=no",
+            "-p",
+            "no:cacheprovider",
+            "test_calculator.py"
+          ],
+          "stderr": "",
+          "stdout": ".                                                                        [100%]\n1 passed in 0.02s\n",
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "/opt/project/.venv/bin/python",
+            "-m",
+            "pytest",
+            "-q",
+            "--tb=short",
+            "--color=no",
+            "-p",
+            "no:cacheprovider",
+            "/opt/checks/test_regression.py"
+          ],
+          "stderr": "",
+          "stdout": ".......                                                                  [100%]\n7 passed in 0.01s\n",
+          "exit_code": 0
+        }
+      ],
+      "patch_id": "a5e78d4c-50eb-50c9-b17e-2246ee8e84d9",
+      "environment": {
+        "git": "git version 2.39.5",
+        "cpus": 1,
+        "image": "traceforge-execution:local",
+        "pytest": "pytest 8.4.2",
+        "python": "3.12.10",
+        "network": "none",
+        "image_id": "sha256:f1558b860e90553a9d1bb09864c499b05303df46ca3ec025d72d7a7811b4c0ee",
+        "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.36",
+        "commit_sha": "f827c3ab8f6c29e42ffb26daa79e529e7becd6c3",
+        "memory_bytes": 268435456,
+        "docker_command": [
+          "docker",
+          "run",
+          "--rm",
+          "-i",
+          "--name",
+          "traceforge-job-e347cf7f-3e00-5263-823a-acaad47b6a49",
+          "--label",
+          "traceforge.execution=true",
+          "--network",
+          "none",
+          "--read-only",
+          "--cap-drop",
+          "ALL",
+          "--security-opt",
+          "no-new-privileges",
+          "--memory",
+          "256m",
+          "--memory-swap",
+          "256m",
+          "--cpus",
+          "1",
+          "--pids-limit",
+          "64",
+          "--tmpfs",
+          "/workspace:rw,noexec,nosuid,size=64m,uid=10001,gid=10001",
+          "--tmpfs",
+          "/tmp:rw,noexec,nosuid,size=32m,uid=10001,gid=10001",
+          "--user",
+          "10001:10001",
+          "sha256:f1558b860e90553a9d1bb09864c499b05303df46ca3ec025d72d7a7811b4c0ee"
+        ],
+        "setup_commands": [
+          {
+            "argv": [
+              "git",
+              "init",
+              "--initial-branch=main",
+              "--object-format=sha1"
+            ],
+            "stderr": "",
+            "stdout": "Initialized empty Git repository in /workspace/repo/.git/\n",
+            "exit_code": 0
+          },
+          {
+            "argv": [
+              "git",
+              "-c",
+              "core.autocrlf=false",
+              "add",
+              "calculator.py",
+              "test_calculator.py"
+            ],
+            "stderr": "",
+            "stdout": "",
+            "exit_code": 0
+          },
+          {
+            "argv": [
+              "git",
+              "-c",
+              "commit.gpgsign=false",
+              "commit",
+              "-m",
+              "Intentional addition regression"
+            ],
+            "stderr": "",
+            "stdout": "[main (root-commit) f827c3a] Intentional addition regression\n 2 files changed, 8 insertions(+)\n create mode 100644 calculator.py\n create mode 100644 test_calculator.py\n",
+            "exit_code": 0
+          }
+        ],
+        "timeout_seconds": 30,
+        "output_limit_bytes": 256000,
+        "container_exit_code": 0,
+        "dependency_preparation": "Locked pytest installed at image build, no runtime downloads",
+        "protected_files_unchanged": true
+      },
+      "limitations": [
+        "Controlled calculator fixture only; passing these checks is not proof of general correctness."
+      ],
+      "duration_seconds": 9.52762866699959,
+      "protected_path_validation": "PASSED",
+      "original_failure_reproduced": true
+    }
+  ],
+  "routing": [
+    {
+      "model": "fake-cheap-v1",
+      "status": "COMPLETED",
+      "provider": "fake",
+      "strategy": "rule_based",
+      "reserved_usd": 0.0,
+      "context_sha256": "562bb5c0d265f6b5318c9661a8eb3b7a3ca2e83768a2dd220803b3d48a3ce89f",
+      "prompt_version": "grounded-engineer-v1",
+      "routing_inputs": {
+        "context_bytes": 1978,
+        "max_model_calls": 3,
+        "failure_category": "APPLICATION_CODE_REGRESSION",
+        "attempts_consumed": 0,
+        "previous_verification_failed": false
+      },
+      "routing_reason": "lower-cost baseline",
+      "pricing_version": "openai-reference-2025-04"
+    },
+    {
+      "model": "fake-cheap-v1",
+      "status": "COMPLETED",
+      "provider": "fake",
+      "strategy": "rule_based",
+      "reserved_usd": 0.0,
+      "context_sha256": "562bb5c0d265f6b5318c9661a8eb3b7a3ca2e83768a2dd220803b3d48a3ce89f",
+      "prompt_version": "grounded-engineer-v1",
+      "routing_inputs": {
+        "context_bytes": 1978,
+        "max_model_calls": 3,
+        "failure_category": "APPLICATION_CODE_REGRESSION",
+        "attempts_consumed": 0,
+        "previous_verification_failed": false
+      },
+      "routing_reason": "lower-cost baseline",
+      "pricing_version": "openai-reference-2025-04"
+    }
+  ],
+  "limitations": [
+    "Verified only against the original test and seven external calculator checks."
+  ]
+}

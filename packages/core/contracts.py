@@ -27,7 +27,7 @@ class Submission(BaseModel):
     model_config = ConfigDict(extra="forbid")
     source: Literal["fixture"] = "fixture"
     fixture_id: str = Field(min_length=1, max_length=80, pattern=r"^[a-z0-9][a-z0-9_-]*$")
-    execution_policy: Literal["saved_evidence_only", "diagnose", "repair"] = "saved_evidence_only"
+    execution_policy: Literal["saved_evidence_only", "diagnose", "reproduce", "repair"] = "saved_evidence_only"
     max_attempts: int = Field(default=3, ge=1, le=10)
     max_model_calls: int = Field(default=0, ge=0, le=10)
     max_spend_usd: float = Field(default=0, ge=0, le=10, allow_inf_nan=False)
@@ -37,11 +37,11 @@ class Submission(BaseModel):
 
     @model_validator(mode="after")
     def validate_policy(self):
-        if self.execution_policy == "saved_evidence_only" and (
+        if self.execution_policy in {"saved_evidence_only", "reproduce"} and (
             self.max_model_calls or self.max_spend_usd
         ):
             raise ValueError("Saved-evidence policy cannot request model calls or spend")
-        if self.execution_policy != "saved_evidence_only" and self.max_model_calls < 1:
+        if self.execution_policy in {"diagnose", "repair"} and self.max_model_calls < 1:
             raise ValueError("Diagnosis/repair requires an explicit positive model-call budget")
         if self.provider == "openai" and self.max_spend_usd <= 0:
             raise ValueError("OpenAI requires an explicit positive spend budget")

@@ -1,0 +1,20 @@
+{
+  "version": "controlled-development-v1",
+  "description": "Development smoke task only; no held-out performance claims are permitted.",
+  "tasks": [{
+    "id": "calculator-add-regression",
+    "fixture_id": "calculator-add",
+    "repository": "owned-fixture://calculator-add",
+    "commit_sha": "f827c3ab8f6c29e42ffb26daa79e529e7becd6c3",
+    "bug_family": "arithmetic-operator",
+    "split": "development",
+    "failure_category": "APPLICATION_CODE_REGRESSION",
+    "expected_outcome": "VERIFIED_REPAIR",
+    "license": "CC0-1.0",
+    "provenance": "Original synthetic TraceForge fixture",
+    "verification": "Original pytest test plus external calculator regression criteria in execution image"
+  }],
+  "validation_tasks": [],
+  "held_out_tasks": [],
+  "limitations": ["One development bug family", "No learned router has been trained", "Not a research benchmark"]
+}

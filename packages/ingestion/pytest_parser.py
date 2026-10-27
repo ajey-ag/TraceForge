@@ -18,7 +18,7 @@ def parse_pytest_log(text: str) -> ParsedLog:
     text = ANSI.sub("", text.replace("\r\n", "\n"))
     limitations = [
         "Deterministic text parsing only; category is a heuristic, not a proven root cause.",
-        "Saved fixture evidence was parsed; this investigation did not execute tests.",
+        "This parser does not execute tests; consult reproduction_status for execution results.",
     ]
     summaries = list(SUMMARY.finditer(text))
     sections = list(SECTION.finditer(text))

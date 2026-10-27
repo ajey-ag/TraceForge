@@ -29,6 +29,7 @@ benchmarks = ["fixtures/*/*.json", "fixtures/*/*.txt", "fixtures/*/source/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--import-mode=importlib"
 markers = ["integration: requires a migrated PostgreSQL database"]
 
 [tool.ruff]
