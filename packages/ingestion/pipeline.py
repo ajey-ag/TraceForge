@@ -1,7 +1,9 @@
 from uuid import uuid5
 
 from packages.artifacts.local import ArtifactStore
+from packages.core.config import Settings
 from packages.core.contracts import EvidenceRef, Report, Stage, Status
+from packages.diagnosis.retrieval import fixture_source, inspect_source
 from packages.ingestion.fixtures import load_fixture
 from packages.ingestion.pytest_parser import PARSER_VERSION, parse_pytest_log
 from packages.persistence.lifecycle import transition
@@ -9,20 +11,30 @@ from packages.persistence.models import Evidence, Investigation, StoredReport
 from packages.persistence.queue import Claim, clear_lease, finish_attempt, owned_job
 
 
-def process_claim(sessions, store: ArtifactStore, claim: Claim) -> Report:
+def process_claim(
+    sessions, store: ArtifactStore, claim: Claim, settings: Settings | None = None
+) -> Report:
     with sessions() as session:
         investigation = session.get(Investigation, claim.investigation_id)
         fixture_id, commit_sha = investigation.fixture_id, investigation.commit_sha
+        policy = investigation.policy
     fixture = load_fixture(fixture_id)
     if fixture.manifest.commit_sha != commit_sha:
         raise ValueError("Fixture commit changed since submission")
     parsed = parse_pytest_log(fixture.log.decode("utf-8", errors="replace"))
     evidence = []
     rows = []
-    for kind, content, source in (
+    inputs = [
         ("PYTEST_LOG", fixture.log, "pytest.txt"),
         ("FIXTURE_MANIFEST", fixture.manifest_bytes, "manifest.json"),
-    ):
+    ]
+    source_files = {}
+    if policy["execution_policy"] != "saved_evidence_only":
+        source_files = fixture_source(fixture_id)
+        inputs.extend(
+            (f"SOURCE:{path}", content.encode(), path) for path, content in source_files.items()
+        )
+    for kind, content, source in inputs:
         key = store.put(content)
         identity = uuid5(claim.investigation_id, kind)
         evidence.append(EvidenceRef(id=identity, type=kind, sha256=key, artifact=key))
@@ -53,6 +65,18 @@ def process_claim(sessions, store: ArtifactStore, claim: Claim) -> Report:
         parsed=parsed,
         evidence=evidence,
     )
+    if policy["execution_policy"] != "saved_evidence_only":
+        from packages.orchestration.runtime import Runtime
+        from packages.orchestration.workflow import run_workflow
+
+        context = {
+            "parsed": parsed.model_dump(),
+            "source": inspect_source(source_files),
+            "evidence": [entry.model_dump(mode="json") for entry in evidence],
+        }
+        report = run_workflow(
+            Runtime(sessions, store, claim, settings or Settings(), policy), report, context
+        )
     report_key = store.put(report.model_dump_json(indent=2).encode())
     with sessions.begin() as session:
         job = owned_job(session, claim)  # Fence stale workers before publishing any DB results.

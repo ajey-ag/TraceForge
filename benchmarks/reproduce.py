@@ -65,7 +65,8 @@ def main() -> int:
             capture_output=True,
             timeout=30,
         )
-        output = result.stdout + result.stderr
+        # Saved evidence uses canonical LF so a fresh Windows/Linux checkout retains its hash.
+        output = (result.stdout + result.stderr).replace(b"\r\n", b"\n")
         sys.stdout.buffer.write(output)
         if args.record:
             if result.returncode != 1 or b"assert -1 == 5" not in output:
@@ -89,7 +90,9 @@ def main() -> int:
                 ).strip(),
                 "platform": sys.platform,
             }
-            (FIXTURE / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+            (FIXTURE / "manifest.json").write_text(
+                json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n"
+            )
         return result.returncode
 
 

@@ -93,3 +93,50 @@ class StoredReport(Base):
     payload: Mapped[dict] = mapped_column(JSONB)
     artifact: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Operation(Base):
+    __tablename__ = "operations"
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    investigation_id: Mapped[UUID] = mapped_column(ForeignKey("investigations.id"), index=True)
+    key: Mapped[str] = mapped_column(String(100))
+    kind: Mapped[str] = mapped_column(String(20))
+    status: Mapped[str] = mapped_column(String(20))
+    request: Mapped[dict] = mapped_column(JSONB)
+    result: Mapped[dict | None] = mapped_column(JSONB)
+    artifact: Mapped[str | None] = mapped_column(Text)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (UniqueConstraint("investigation_id", "key"),)
+
+
+class PatchCandidate(Base):
+    __tablename__ = "patch_candidates"
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    investigation_id: Mapped[UUID] = mapped_column(ForeignKey("investigations.id"), index=True)
+    parent_commit: Mapped[str] = mapped_column(String(40))
+    artifact: Mapped[str] = mapped_column(Text)
+    changed_files: Mapped[list] = mapped_column(JSONB)
+    attempt: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(30))
+
+
+class VerificationRun(Base):
+    __tablename__ = "verification_runs"
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    patch_id: Mapped[UUID] = mapped_column(ForeignKey("patch_candidates.id"))
+    investigation_id: Mapped[UUID] = mapped_column(ForeignKey("investigations.id"), index=True)
+    payload: Mapped[dict] = mapped_column(JSONB)
+
+
+class Delivery(Base):
+    __tablename__ = "deliveries"
+    key: Mapped[str] = mapped_column(String(200), primary_key=True)
+    investigation_id: Mapped[UUID] = mapped_column(ForeignKey("investigations.id"))
+
+
+class Experiment(Base):
+    __tablename__ = "experiments"
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    payload: Mapped[dict] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

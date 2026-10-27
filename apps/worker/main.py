@@ -42,7 +42,7 @@ def run_once(sessions, store, settings: Settings, owner: str) -> bool:
     thread = threading.Thread(target=renew, daemon=True)
     thread.start()
     try:
-        process_claim(sessions, store, claim)
+        process_claim(sessions, store, claim, settings)
         logger.info("Report persisted", extra=context)
     except LeaseLost:
         logger.info("Stopped stale or cancelled job", extra=context)

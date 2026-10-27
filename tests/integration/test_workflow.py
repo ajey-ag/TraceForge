@@ -1,9 +1,14 @@
+import os
+import subprocess
+import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from uuid import UUID
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 
@@ -149,3 +154,54 @@ def test_cancel_prevents_publication(db, postgres_settings, running):
     assert claim_job(db, "next", 30) is None
     with db() as session:
         assert session.get(StoredReport, identity) is None
+
+
+def test_process_crash_is_recovered_by_fresh_worker_process(db, postgres_settings):
+    identity = submit(postgres_settings)
+    env = os.environ | {
+        "TRACEFORGE_DATABASE_URL": postgres_settings.database_url,
+        "TRACEFORGE_ARTIFACT_ROOT": str(postgres_settings.artifact_root),
+    }
+    crashed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "import os; from packages.core.config import Settings; "
+                "from packages.persistence.database import make_engine, session_factory; "
+                "from packages.persistence.queue import claim_job; "
+                "sessions = session_factory(make_engine(Settings())); "
+                "claim = claim_job(sessions, 'crashed-process', 30); "
+                "assert claim is not None; os._exit(17)"
+            ),
+        ],
+        env=env,
+        capture_output=True,
+        timeout=20,
+    )
+    assert crashed.returncode == 17, crashed.stderr.decode()
+    with db.begin() as session:
+        job = session.scalar(select(Job).where(Job.investigation_id == identity))
+        assert job.status == "RUNNING"
+        # Advance the lease expiry rather than sleeping for 30 seconds.
+        job.lease_expires_at = func.now() - timedelta(seconds=1)
+    worker = subprocess.run(
+        [sys.executable, "-m", "apps.worker.main", "--once"],
+        env=env,
+        capture_output=True,
+        timeout=20,
+    )
+    assert worker.returncode == 0, worker.stderr.decode()
+    with db() as session:
+        assert session.get(StoredReport, identity).payload["outcome"] == "DIAGNOSED"
+        attempts = session.scalars(select(JobAttempt).order_by(JobAttempt.number)).all()
+        assert [attempt.status for attempt in attempts] == ["ABANDONED", "COMPLETED"]
+
+
+def test_migration_matches_models_and_roundtrips(db, postgres_settings):
+    # The session fixture directs Alembic to this disposable database only.
+    config = Config("alembic.ini")
+    command.check(config)
+    command.downgrade(config, "base")
+    command.upgrade(config, "head")
+    command.check(config)

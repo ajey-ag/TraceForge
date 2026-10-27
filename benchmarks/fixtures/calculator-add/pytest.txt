@@ -7,4 +7,4 @@ E   assert -1 == 5
 E    +  where -1 = add(2, 3)
 =========================== short test summary info ===========================
 FAILED test_calculator.py::test_add_positive_numbers - assert -1 == 5
-1 failed in 0.31s
+1 failed in 0.12s

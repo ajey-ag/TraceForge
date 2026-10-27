@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import make_url
 
@@ -14,6 +14,17 @@ class Settings(BaseSettings):
     poll_seconds: float = Field(default=1, ge=0.05, le=60)
     max_attempts: int = Field(default=3, ge=1, le=10)
     log_level: str = "INFO"
+    openai_api_key: SecretStr | None = None
+    cheap_model: str = "gpt-4.1-mini"
+    strong_model: str = "gpt-4.1"
+    model_timeout_seconds: int = Field(default=45, ge=1, le=120)
+    runner_url: str = "http://127.0.0.1:8765"
+    runner_token: SecretStr = SecretStr("local-traceforge-runner")
+    runner_image: str = "traceforge-execution:local"
+    runner_state: Path = Path(".runner-state")
+    github_token: SecretStr | None = None
+    github_webhook_secret: SecretStr | None = None
+    github_repositories: str = ""
 
     @field_validator("database_url")
     @classmethod

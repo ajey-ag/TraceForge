@@ -15,7 +15,7 @@
   "expected_exit_code": 1,
   "expected_failure": "test_calculator.py::test_add_positive_numbers: AssertionError",
   "expected_outcome": "DIAGNOSED",
-  "log_sha256": "319b2897d1a997b8257068a01532dd827b198a7314e6921ce455bd55c6f86ae6",
+  "log_sha256": "5bb74bfadfa0c0dd8fd7dd26dbce16fc4831f7196567b4d1157e691ab5e2bcff",
   "provenance": "Original synthetic fixture authored for TraceForge; CC0-1.0",
   "python_version": "3.12.10",
   "pytest_version": "pytest 8.4.2",

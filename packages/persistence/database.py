@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 from packages.core.config import Settings
 
-SCHEMA_REVISION = "0001_foundation"
+SCHEMA_REVISION = "0002_execution"
 
 
 def make_engine(settings: Settings):

@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "investigation_id": "45b06a96-63c0-4397-a196-50e177f23f3e",
+  "investigation_id": "f33956e5-39b0-4464-ba3b-c47449a679d1",
   "source": "fixture",
   "fixture_id": "calculator-add",
   "commit_sha": "f827c3ab8f6c29e42ffb26daa79e529e7becd6c3",
@@ -32,16 +32,16 @@
   },
   "evidence": [
     {
-      "id": "bb836c29-9848-578a-b944-b9251cd18f58",
+      "id": "07b9aedd-1fdf-5cb6-a953-e399107c3a21",
       "type": "PYTEST_LOG",
-      "sha256": "319b2897d1a997b8257068a01532dd827b198a7314e6921ce455bd55c6f86ae6",
-      "artifact": "319b2897d1a997b8257068a01532dd827b198a7314e6921ce455bd55c6f86ae6"
+      "sha256": "5bb74bfadfa0c0dd8fd7dd26dbce16fc4831f7196567b4d1157e691ab5e2bcff",
+      "artifact": "5bb74bfadfa0c0dd8fd7dd26dbce16fc4831f7196567b4d1157e691ab5e2bcff"
     },
     {
-      "id": "a7bc3d70-8e03-52a3-90ff-122ab8dfd2c4",
+      "id": "de0f7fc7-c0f5-5088-ae9a-00438997b2cb",
       "type": "FIXTURE_MANIFEST",
-      "sha256": "a5c424ace1940b963a13a042c7e2809bd55089b681f33db38aacf0f2fecaa0d7",
-      "artifact": "a5c424ace1940b963a13a042c7e2809bd55089b681f33db38aacf0f2fecaa0d7"
+      "sha256": "c0c184feca2397a22495dba147d90483937d5eb61e05bdddd05c9f1e4d24fc8b",
+      "artifact": "c0c184feca2397a22495dba147d90483937d5eb61e05bdddd05c9f1e4d24fc8b"
     }
   ],
   "reproduction_status": "NOT_RUN_SAVED_LOG_ONLY",
